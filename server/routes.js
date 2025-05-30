@@ -132,59 +132,17 @@ router.get('/chemicals', async (req, res) => {
   }
 });
 
-router.post('/api/barcode', async (req, res) => {
-  const { barcode_value } = req.body;
 
-  if (!barcode_value) {
-    return res.status(400).json({ error: 'barcode_value is required' });
-  }
-
-  try {
-    // 1. ค้นหา chemical_id จาก barcode
-    const result = await pool.query('SELECT id FROM chemicals WHERE barcode = $1', [barcode_value]);
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Chemical not found for given barcode' });
-    }
-
-    const chemical_id = result.rows[0].id;
-
-    // 2. บันทึกการสแกนลงตาราง barcode
-    await pool.query(
-      'INSERT INTO barcode (chemical_id, barcode_value, scan_time) VALUES ($1, $2, NOW())',
-      [chemical_id, barcode_value]
-    );
-
-    // 3. เพิ่ม amount ในตาราง chemicals
-    await pool.query('UPDATE chemicals SET amount = amount + 1 WHERE id = $1', [chemical_id]);
-
-    res.status(200).json({ message: 'Barcode scanned and chemical amount updated' });
-  } catch (err) {
-    console.error('Error handling barcode scan:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-// POST - Add scanned barcode
-router.post('/barcodes', async (req, res) => {
-  const { chemical_id, barcode_value } = req.body;
-
-  if (!chemical_id || !barcode_value) {
-    return res.status(400).json({ error: 'Missing chemical_id or barcode_value' });
-  }
-
+router.get('/barcode', async (req, res) => {
   try {
     const pool = getDB(req);
-    const result = await pool.query(
-      `INSERT INTO barcode (chemical_id, barcode_value, scan_time)
-       VALUES ($1, $2, NOW())
-       RETURNING *`,
-      [chemical_id, barcode_value]
-    );
-    res.status(201).json(result.rows[0]);
+    const result = await pool.query('SELECT * FROM barcode ORDER BY id');
+    res.json(result.rows);
   } catch (err) {
-    console.error('❌ Error inserting barcode:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
+
+
 
 module.exports = router;
