@@ -144,18 +144,18 @@ router.get('/barcode', async (req, res) => {
 });
 
 router.post('/barcode', async (req, res) => {
-  const { chemical_id, barcode_value, scan_time } = req.body;
+  const { chemical_id, barcode_value } = req.body;
 
   // ตรวจสอบข้อมูลเบื้องต้น
-  if (!chemical_id || !barcode_value || !scan_time) {
+  if (!chemical_id || !barcode_value ) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
   try {
     const pool = getDB(req);
     const result = await pool.query(
-      'INSERT INTO barcode (chemical_id, barcode_value, scan_time) VALUES ($1, $2, $3) RETURNING *',
-      [chemical_id, barcode_value, scan_time]
+      'INSERT INTO barcode (chemical_id, barcode_value) VALUES ($1, $2) RETURNING *',
+      [chemical_id, barcode_value]
     );
 
     res.status(201).json(result.rows[0]); // ส่งข้อมูลที่เพิ่มกลับไป
