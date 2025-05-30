@@ -1,0 +1,86 @@
+  <!-- update.html -->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <meta charset="UTF-8" />
+  <title>Update History</title>
+  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header>
+    <div class="logo">My storage</div>
+    <div class="search">
+      <input type="text" class="searchTerm" placeholder="Search">
+      <button type="submit" class="searchButton">
+        <i class="fa fa-search"></i>
+      </button>
+    </div>
+    <div class="hamburger" onclick="toggleMenu()">
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>
+    <nav class="nav-bar" id="navBar">
+      <ul>
+        <li><a href="form.html">Home</a></li>
+        <li><a class="active" href="update.html">Update</a></li>
+        <li><a href="storage.html">Storage</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="card-panel" id="history-container"></div>
+  </div>
+
+  <script>
+    async function fetchUpdateHistory() {
+      try {
+        const res = await fetch('http://localhost:5000/api/chemical-updates');
+        const data = await res.json();
+
+        const container = document.getElementById('history-container');
+        container.innerHTML = "";
+
+        const filtered = data.filter(entry => entry.chemical_name); // กรองเฉพาะรายการที่มีชื่อสารเคมี
+
+        if (!filtered.length) {
+          container.innerHTML = '<p>ไม่พบข้อมูลการอัปเดต</p>';
+          return;
+        }
+
+        filtered.forEach(entry => {
+          const card = document.createElement('div');
+          card.className = 'chem-card';
+          card.innerHTML = `
+            <img src="https://cdn-icons-png.flaticon.com/512/2907/2907163.png" alt="chemical" />
+            <div class="info">
+              <strong>${entry.chemical_name}</strong>
+              <p>การกระทำ: ${entry.action}</p>
+              <p>จำนวน: ${entry.amount}</p>
+              <p>เวลา: ${new Date(entry.updated_at).toLocaleString('th-TH')}</p>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error('⚠️ Fetch error:', error);
+        document.getElementById('history-container').innerHTML = '<p>เกิดข้อผิดพลาดในการโหลดข้อมูล</p>';
+      }
+    }
+
+    function toggleMenu() {
+      document.getElementById("navBar").classList.toggle("active");
+    }
+
+    fetchUpdateHistory();
+  </script>
+
+</body>
+</html>

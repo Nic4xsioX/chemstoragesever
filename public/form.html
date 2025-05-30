@@ -1,0 +1,290 @@
+<!-- form.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>เพิ่มโพสต์</title>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">My storage</div>
+    <div class="search">
+      <input type="text" class="searchTerm" placeholder="Search">
+      <button type="submit" class="searchButton">
+        <i class="fa fa-search"></i>
+      </button>
+    </div>
+    <div class="hamburger">
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>
+    <nav class="nav-bar">
+      <ul>
+        <li><a href="form.html" class="active">Home</a></li>
+        <li><a href="update.html">Update</a></li>
+        <li><a href="storage.html">Storage</a></li>
+        <li><a href="">About</a></li>
+        <li><a href="">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <button id="addButton" class="fab">+</button> 
+
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeModal">&times;</span>
+      <form id="addForm" class="form-box">
+        <h2>เพิ่มสารเคมี</h2>
+        <div class="input-group">
+          <i class="fas fa-flask"></i>
+          <input type="text" id="name" placeholder="ชื่อสารเคมี" required />
+        </div>
+        <div class="input-group">
+          <i class="fas fa-atom"></i>
+          <input type="text" id="formula" placeholder="สูตรเคมี" required />
+        </div>
+        <div class="input-group">
+          <i class="fas fa-tag"></i>
+          <input type="text" id="type" placeholder="ประเภท" />
+        </div>
+        <div class="input-group">
+          <i class="fas fa-box"></i>
+          <input type="number" id="amount" placeholder="จำนวน" required />
+        </div>
+        <div class="input-group">
+          <i class="fas fa-image"></i>
+          <input type="text" id="image" placeholder="URL รูปภาพ" />
+        </div>
+        <button type="submit" class="submit-btn">เพิ่มข้อมูล</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="detail-panel" id="detailPanel">
+      <h2>เลือกสารเคมี</h2>
+      <p>รายละเอียดจะแสดงที่นี่เมื่อคุณคลิกการ์ด</p>
+    </div>
+    <div class="card-panel" id="cardPanel"></div>
+  </div>
+
+  <script>
+    let chemicalsData = [];
+
+    async function loadChemicals() {
+      try {
+        const res = await fetch("http://localhost:5000/api/chemicals");
+        if (!res.ok) throw new Error("โหลดข้อมูลล้มเหลว");
+        const chemicals = await res.json();
+        chemicalsData = chemicals;
+        renderChemicals(chemicals);
+      } catch (error) {
+        console.error("โหลดข้อมูลล้มเหลว:", error);
+        document.getElementById("cardPanel").innerHTML = `<p>ไม่สามารถโหลดข้อมูลได้</p>`;
+      }
+    }
+
+    function renderChemicals(chemicalList) {
+      const cardPanel = document.getElementById("cardPanel");
+      const detailPanel = document.getElementById("detailPanel");
+      cardPanel.innerHTML = "";
+
+      chemicalList.forEach((chem) => {
+        const card = document.createElement("div");
+        card.className = "chem-card";
+        card.innerHTML = `
+          <img src="${chem.image}" alt="${chem.name}" />
+          <div class="info">
+            <strong>${chem.name}</strong> 
+            <p>${chem.formula}</p>
+            ${chem.type ? `<span>${chem.type}</span>` : ""}
+          </div>
+        `;
+
+        card.addEventListener("click", () => showChemicalDetail(chem));
+        cardPanel.appendChild(card);
+      });
+    }
+
+    function renderDetail(chem) {
+      const detailPanel = document.getElementById("detailPanel");
+      detailPanel.innerHTML = `
+        <h2>${chem.name}</h2>
+        <img src="${chem.image}" alt="${chem.name}" />
+        <p><strong>สูตร:</strong> ${chem.formula}</p>
+        ${chem.type ? `<p><strong>ลักษณะ:</strong> ${chem.type}</p>` : ""}
+        <p><strong>ปริมาณ:</strong> ${chem.amount}</p>
+        <div style="margin-top: 15px;">
+          <button class="btn-small" onclick="editChemical('${chem.id}')">✏️ แก้ไข</button>
+          <button class="btn-small" onclick="deleteChemical('${chem.id}')">🗑️ ลบ</button>
+          <button class="btn-small" onclick="window.updateAmount('${chem.id}', 1)">➕ เพิ่ม</button>
+          <button class="btn-small" onclick="window.updateAmount('${chem.id}', -1)">➖ ลด</button>
+        </div>
+      `;
+    }
+
+    async function updateAmount(id, delta) {
+  try {
+    const chem = chemicalsData.find(c => c.id === Number(id));
+    if (!chem) return;
+
+    alert("กรุณาแสกนสารเพื่อเพิ่มหรือลดสาร"); // ✅ เพิ่ม alert ตรงนี้
+
+    const confirmText = delta > 0
+      ? `คุณต้องการเพิ่มปริมาณของ "${chem.name}" ขึ้น 1 หน่วยหรือไม่?`
+      : `คุณต้องการลดปริมาณของ "${chem.name}" ลง 1 หน่วยหรือไม่?`;
+
+    if (!confirm(confirmText)) return;
+
+    if (chem.amount + delta < 0) {
+      alert("❌ ปริมาณไม่สามารถน้อยกว่า 0 ได้");
+      return;
+    }
+
+    // อัปเดต amount
+    const res = await fetch(`http://localhost:5000/api/chemicals/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ delta })
+    });
+
+    if (!res.ok) throw new Error("ไม่สามารถอัปเดตข้อมูลได้");
+
+    // ✨ เพิ่มส่วนนี้เมื่อ delta > 0 (เพิ่มปริมาณ)
+    if (delta > 0) {
+      try {
+        const barcodeRes = await fetch("http://<ESP8266-IP>/scan");
+        const { barcode } = await barcodeRes.json();
+
+        await fetch("http://localhost:5000/api/barcodes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chemical_id: id,
+            barcode_value: barcode
+          })
+        });
+      } catch (barcodeErr) {
+        console.warn("ไม่สามารถสแกนบาร์โค้ดได้:", barcodeErr);
+      }
+    }
+
+    const updated = await res.json();
+    alert("✅ อัปเดตสำเร็จ");
+
+    chemicalsData = chemicalsData.map(c => c.id === id ? updated : c);
+    showChemicalDetail(updated);
+    renderChemicals(chemicalsData);
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ เกิดข้อผิดพลาดในการอัปเดต");
+  }
+}
+  window.updateAmount = updateAmount;
+
+  function showChemicalDetail(chemical) {
+    const detailPanel = document.getElementById("detailPanel");
+    detailPanel.innerHTML = `
+      <h2>${chemical.name}</h2>
+      <img src="${chemical.image}" alt="${chemical.name}" />
+      <p><strong>สูตร:</strong> ${chemical.formula}</p>
+      ${chemical.type ? `<p><strong>ลักษณะ:</strong> ${chemical.type}</p>` : ""}
+      <p><strong>ปริมาณ:</strong> ${chemical.amount}</p>
+      <div style="margin-top: 15px;">
+        <button class="btn-small" onclick="editChemical('${chemical.id}')">✏️ แก้ไข</button>
+        <button class="btn-small" onclick="deleteChemical('${chemical.id}')">🗑️ ลบ</button>
+        <button class="btn-small" onclick="window.updateAmount('${chemical.id}', 1)">➕ เพิ่ม</button>
+        <button class="btn-small" onclick="window.updateAmount('${chemical.id}', -1)">➖ ลด</button>
+      </div>
+    `;
+  }
+
+    function searchChemicals(query) {
+      const filtered = chemicalsData.filter((chem) =>
+        chem.name.toLowerCase().includes(query.toLowerCase())
+      );
+      renderChemicals(filtered);
+    }
+
+    window.editChemical = function(id) {
+      const newName = prompt("กรุณากรอกชื่อใหม่:");
+      if (newName) {
+        fetch(`http://localhost:5000/api/chemicals/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: newName })
+        })
+        .then(() => loadChemicals())
+        .catch((err) => console.error(err));
+      }
+    };
+
+    window.deleteChemical = function(id) {
+      if (confirm("คุณแน่ใจหรือไม่ว่าต้องการลบ?")) {
+        fetch(`http://localhost:5000/api/chemicals/${id}`, {
+          method: "DELETE",
+        })
+        .then(() => loadChemicals())
+        .catch((err) => console.error(err));
+      }
+    };
+
+    document.getElementById("addForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value;
+      const formula = document.getElementById("formula").value;
+      const type = document.getElementById("type").value;
+      const amount = parseInt(document.getElementById("amount").value);
+      const image = document.getElementById("image").value;
+
+      try {
+        const res = await fetch("http://localhost:5000/api/chemicals", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, formula, type, amount, image })
+        });
+
+        if (!res.ok) throw new Error("ไม่สามารถเพิ่มข้อมูลได้");
+
+        alert("✅ เพิ่มข้อมูลเรียบร้อยแล้ว!");
+        document.getElementById("modal").style.display = "none";
+        loadChemicals();
+      } catch (err) {
+        alert("❌ เกิดข้อผิดพลาดในการเพิ่มข้อมูล");
+        console.error(err);
+      }
+    });
+
+    document.getElementById("addButton").addEventListener("click", () => {
+      document.getElementById("modal").style.display = "block";
+    });
+
+    document.getElementById("closeModal").addEventListener("click", () => {
+      document.getElementById("modal").style.display = "none";
+    });
+
+    window.addEventListener("click", (e) => {
+      if (e.target == document.getElementById("modal")) {
+        document.getElementById("modal").style.display = "none";
+      }
+    });
+
+    document.querySelector(".searchTerm").addEventListener("input", (e) => {
+      searchChemicals(e.target.value);
+    });
+
+    document.querySelector(".hamburger").onclick = function () {
+      document.querySelector(".nav-bar").classList.toggle("active");
+    };
+
+    window.addEventListener("DOMContentLoaded", loadChemicals);
+  </script>
+</body>
+</html>

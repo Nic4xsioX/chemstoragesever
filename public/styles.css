@@ -1,0 +1,345 @@
+*{
+    margin: 0;
+    padding: 0;
+    list-style :none;
+    text-decoration: none;
+    font-family: "Google Sans Regular";
+    box-sizing: border-box;
+    border: 0;
+}
+@import url(https://fonts.googleapis.com/css?family=Open+Sans);
+
+body{
+  background: #f2f2f2;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.search {
+  width: 100%;
+  position: relative;
+  display: flex;
+  margin-right: 20px;
+  margin-left: 20px;
+}
+
+.searchTerm {
+  width: 100%;
+  border: 3px solid #363350;
+  border-right: none;
+  padding: 15px;
+  height: 20px;
+  border-radius: 5px 0 0 5px;
+  outline: none;
+  color: #363350;
+}
+
+.searchTerm:focus{
+  color: #363350;
+}
+
+.searchButton {
+  width: 40px;
+  height: 36px;
+  border: 1px solid #363350;
+  background: #363350;
+  text-align: center;
+  color: #fff;
+  border-radius: 0 5px 5px 0;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+/*Resize the wrap to see the search bar change!*/
+.wrap{
+  width: 30%;
+  display: block;
+  padding: 10px 25px;
+  margin: 0 5px;
+  border-radius: 50px;
+  size: 80px;
+  transform: translate(-50%, -50%);
+}
+.search-wrapper{
+    display: flex;
+    padding: 10px 25px;
+    margin: 0 5px;
+    border-radius: 50px;
+    size: 80px;
+}
+.search-bar{
+    padding: 10px 25px;
+    margin: 0 5px;
+    border-radius: 50px;
+    size: 80px;
+}
+header {
+    width: 100%;
+    height: 80px;
+    background-color: #11101b;
+    display: flex;
+    align-items: center ;
+    justify-content: space-between;
+    padding: 0 100px;
+}
+.logo{
+    font-size: 28px;
+    font-weight: bold;
+    color: #fefefe;
+    margin-right: 10px;
+}
+
+.hamburger{
+    display: none;
+
+}
+.nav-bar ul {
+    display: flex;
+
+}
+.nav-bar ul li a {
+    display: block ;
+    color: #fefefe;
+    font-size: 20px;
+    padding: 10px 25px;
+    border-radius: 50px;
+    transition: 0.2s;
+    margin: 0 5px;
+}
+
+.nav-bar ul li a:hover {
+    color:#11101b;
+    background-color: #fefefe;
+}
+.nav-bar ul li a.active {
+    color: #11101b;
+    background-color: #fefefe;
+}
+@media only screen and (max-width: 1320px){
+    header{
+        padding: 0 50px ;
+    }
+}
+@media only screen and (max-width: 1100px){
+    header{
+        padding: 0 30px ;
+    }
+}
+@media only screen and (max-width: 900px){
+    .hamburger{
+        display: block;
+        cursor: pointer;
+    }
+    .hamburger .line{
+        width: 30px;
+        height: 3px;
+        background-color: #fefefe;
+        margin: 6px 0;
+    }
+    .nav-bar.active{
+        height: 450px;
+    }
+    .nav-bar{
+        height: 0px;
+        position: absolute;
+        top: 80px;
+        left: 0;
+        right: 0;
+        width: 100vw;
+        background-color: #11101b;
+        transition: 0.5s;
+        overflow: hidden;
+    }
+    .nav-bar ul {
+        display: block;
+        width: fit-content;
+        margin: 80px auto 0 auto;
+        text-align: center;
+        transition: 0.5s;
+        opacity: 0;
+    }
+    .nav-bar.active ul{
+        opacity: 1;
+    }
+    .nav-bar ul li a{
+        margin-bottom: 12px;
+        
+    }
+}
+.container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  .detail-panel {
+    width: 40%;
+    background-color: #ffffff;
+    padding: 30px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    overflow-y: auto;
+    border-radius: 15px;
+    margin-top: 15px;
+  }
+  
+  .detail-panel img {
+    max-width: 100%;
+    height: auto;
+    margin-top: 15px;
+  }
+  
+  .card-panel {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .chem-card {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border-radius: 10px;
+    padding: 10px 15px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  
+  .chem-card:hover {
+    transform: scale(1.02);
+  }
+  
+  .chem-card img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    margin-right: 15px;
+    border-radius: 8px;
+  }
+  
+  .chem-card .info p {
+    margin: 4px 0;
+    font-size: 14px;
+  }
+  
+  .chem-card .info span {
+    font-size: 12px;
+    color: #666;
+  }
+  /* ปุ่มลอย */
+.fab {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #11101b;
+  color: white;
+  font-size: 36px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  z-index: 1000;
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 30px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.form-box {
+  background: #3e3c61;
+  padding: 30px 25px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 400px;
+  margin: auto;
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.form-box h2 {
+  margin-bottom: 20px;
+  color: #11101b;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.input-group i {
+  margin-right: 10px;
+  color: #1f1e31;
+}
+
+.input-group input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 16px;
+  background: transparent;
+}
+
+.submit-btn {
+  background: 11101b;
+  color: #1f1e31;
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
+  transition: background 0.3s ease;
+}
+
+.submit-btn:hover {
+  background: #605e91;
+}
+.btn-small {
+  background-color: #605e91;
+  border: none;
+  padding: 4px 8px;
+  margin: 2px;
+  border-radius: 6px;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+}
+.btn-small:hover {
+  background-color: #45436f;
+}

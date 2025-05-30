@@ -1,0 +1,137 @@
+<!-- storage.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <meta charset="UTF-8" />
+  <title>Storage</title>
+  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .chem-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  text-align: center;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 200px;
+}
+
+.chem-card img {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 16px 16px 0 0;
+}
+
+.chem-card p {
+  margin: 10px 0;
+  font-weight: bold;
+  font-size: 14px;
+}
+  </style>
+</head>
+<body>
+    <header>
+        <div class="logo">My storage</div>
+        <div class="search">
+          <input type="text" class="searchTerm" placeholder="Search">
+          <button type="submit" class="searchButton">
+            <i class="fa fa-search"></i>
+          </button>
+        </div>
+        <div class="hamburger" onclick="toggleMenu()">
+          <div class="line"></div>
+          <div class="line"></div>
+          <div class="line"></div>
+        </div>
+        <nav class="nav-bar" id="navBar">
+          <ul>
+            <li><a href="form.html">Home</a></li>
+            <li><a class="active" href="update.html">Update</a></li>
+            <li><a href="storage.html">Storage</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </nav>
+      </header>
+
+  <div class="grid-container" id="storageGrid"></div>
+
+  <script>
+    async function loadChemicals() {
+      try {
+        const res = await fetch("http://localhost:5000/api/chemicals");
+        if (!res.ok) throw new Error("โหลดข้อมูลล้มเหลว");
+        const chemicals = await res.json();
+        renderStorageCards(chemicals);
+      } catch (err) {
+        console.error("❌ ไม่สามารถโหลดข้อมูล:", err);
+        document.getElementById("storageGrid").innerHTML = "<p>ไม่สามารถโหลดข้อมูลได้</p>";
+      }
+    }
+
+    function renderStorageCards(chemicals) {
+      const container = document.getElementById("storageGrid");
+      container.innerHTML = "";
+      chemicals.forEach(chem => {
+        const card = document.createElement("div");
+        card.className = "chem-card";
+        card.innerHTML = `
+          <img src="${chem.image}" alt="${chem.name}" />
+          <p>${chem.name}</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    window.addEventListener("DOMContentLoaded", loadChemicals);
+    
+  async function loadStorageChemicals() {
+    try {
+      const res = await fetch("http://localhost:5000/api/chemicals");
+      if (!res.ok) throw new Error("ไม่สามารถโหลดข้อมูลได้");
+      const chemicals = await res.json();
+      renderStorageChemicals(chemicals);
+    } catch (err) {
+      console.error("โหลดข้อมูลล้มเหลว:", err);
+      document.body.innerHTML += "<p>ไม่สามารถโหลดข้อมูลได้</p>";
+    }
+  }
+
+  function renderStorageChemicals(chemicalList) {
+    const container = document.createElement("div");
+    container.className = "grid-container";
+
+    chemicalList.forEach((chem) => {
+      const card = document.createElement("div");
+      card.className = "chem-card";
+      card.innerHTML = `
+        <img src="${chem.image}" alt="${chem.name}" />
+        <p>${chem.name}</p>
+      `;
+      container.appendChild(card);
+    });
+
+    document.body.appendChild(container);
+  }
+
+  window.addEventListener("DOMContentLoaded", loadStorageChemicals);
+
+  function toggleMenu() {
+    document.getElementById("navBar").classList.toggle("active");
+  }
+  </script>
+</body>
+</html>
