@@ -148,7 +148,7 @@
     }
 
     // อัปเดต amount
-    const res = await fetch(`http://localhost:5000/api/chemicals/${id}`, {
+    const res = await fetch(`/api/chemicals/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ delta })
@@ -162,7 +162,7 @@
         const barcodeRes = await fetch("http://<ESP8266-IP>/scan");
         const { barcode } = await barcodeRes.json();
 
-        await fetch("http://localhost:5000/api/barcodes", {
+        await fetch("/api/barcodes", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -216,7 +216,7 @@
     window.editChemical = function(id) {
       const newName = prompt("กรุณากรอกชื่อใหม่:");
       if (newName) {
-        fetch(`http://localhost:5000/api/chemicals/${id}`, {
+        fetch(`/api/chemicals/${id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: newName })
@@ -228,7 +228,7 @@
 
     window.deleteChemical = function(id) {
       if (confirm("คุณแน่ใจหรือไม่ว่าต้องการลบ?")) {
-        fetch(`http://localhost:5000/api/chemicals/${id}`, {
+        fetch(`/api/chemicals/${id}`, {
           method: "DELETE",
         })
         .then(() => loadChemicals())
@@ -245,7 +245,7 @@
       const image = document.getElementById("image").value;
 
       try {
-        const res = await fetch("http://localhost:5000/api/chemicals", {
+        const res = await fetch("/api/chemicals", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, formula, type, amount, image })

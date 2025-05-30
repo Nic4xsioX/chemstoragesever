@@ -42,7 +42,7 @@
   <script>
     async function fetchUpdateHistory() {
       try {
-        const res = await fetch('http://localhost:5000/api/chemical-updates');
+        const res = await fetch('/api/chemical-updates');
         const data = await res.json();
 
         const container = document.getElementById('history-container');

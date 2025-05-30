@@ -72,7 +72,7 @@
   <script>
     async function loadChemicals() {
       try {
-        const res = await fetch("http://localhost:5000/api/chemicals");
+        const res = await fetch("/api/chemicals");
         if (!res.ok) throw new Error("โหลดข้อมูลล้มเหลว");
         const chemicals = await res.json();
         renderStorageCards(chemicals);
@@ -100,7 +100,7 @@
     
   async function loadStorageChemicals() {
     try {
-      const res = await fetch("http://localhost:5000/api/chemicals");
+      const res = await fetch("/api/chemicals");
       if (!res.ok) throw new Error("ไม่สามารถโหลดข้อมูลได้");
       const chemicals = await res.json();
       renderStorageChemicals(chemicals);
