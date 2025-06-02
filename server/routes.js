@@ -7,166 +7,111 @@ function getDB(req) {
   return req.app.get('db');
 }
 
-// GET - Read All Posts
-router.get('/posts', async (req, res) => {
+// ------------------- Storage Routes -------------------
+
+// GET - ดึงข้อมูล Storage ทั้งหมด
+router.get('/storage', async (req, res) => {
   try {
     const pool = getDB(req);
-    const result = await pool.query('SELECT * FROM posts ORDER BY id DESC');
+    const result = await pool.query('SELECT * FROM Storage ORDER BY id');
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// POST - Create or Update Post with Accumulated Amount
-router.post('/posts', async (req, res) => {
-  const { id, title, content, amount } = req.body;
-  const validAmount = Number(amount);
-  if (!id || !title || !content || isNaN(validAmount)) {
-    return res.status(400).json({ error: 'Invalid or missing data' });
-  }
-
-  try {
-    const pool = getDB(req);
-    const existing = await pool.query('SELECT * FROM posts WHERE id = $1', [id]);
-
-    let result;
-    if (existing.rows.length > 0) {
-      result = await pool.query(
-        `UPDATE posts
-         SET amount = amount + $1,
-             title = $2,
-             content = $3,
-             update_time = NOW()
-         WHERE id = $4
-         RETURNING *`,
-        [validAmount, title, content, id]
-      );
-    } else {
-      result = await pool.query(
-        `INSERT INTO posts (id, title, content, amount, update_time)
-         VALUES ($1, $2, $3, $4, NOW())
-         RETURNING *`,
-        [id, title, content, validAmount]
-      );
-    }
-    res.status(201).json(result.rows[0]);
-  } catch (err) {
-    console.error('❌ DB error:', err);
+    console.error('❌ Error fetching Storage:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
 
-// PUT - Update Post Amount
-router.put('/posts/:id/amount', async (req, res) => {
-  const { id } = req.params;
-  const { delta } = req.body;
+// POST - เพิ่มข้อมูล Storage
+router.post('/storage', async (req, res) => {
+  const { Name, formula, Type, Picture, Warning, Elucidation, LocateName } = req.body;
 
-  if (typeof delta !== 'number') {
-    return res.status(400).json({ error: 'Missing or invalid delta (must be a number)' });
-  }
-
-  try {
-    const pool = getDB(req);
-    const result = await pool.query(
-      `UPDATE posts SET amount = amount + $1, update_time = NOW() WHERE id = $2 RETURNING *;`,
-      [delta, id]
-    );
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Post not found' });
-    }
-    res.json({ message: 'Amount updated successfully', post: result.rows[0] });
-  } catch (err) {
-    console.error('❌ Error updating amount:', err);
-    res.status(500).json({ error: 'Database error' });
-  }
-});
-
-// DELETE - Delete Post
-router.delete('/posts/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    const pool = getDB(req);
-    const result = await pool.query('DELETE FROM posts WHERE id = $1 RETURNING *', [id]);
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Post not found' });
-    }
-    res.json({ message: 'Post deleted successfully' });
-  } catch (err) {
-    console.error('❌ Error deleting post:', err);
-    res.status(500).json({ error: 'Database error' });
-  }
-});
-
-
-// GET: ดึงข้อมูล chemical รายตัว
-router.get('/chemicals/:id', async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const pool = getDB(req);
-    const result = await pool.query(
-      `SELECT * FROM chemicals WHERE id = $1`,
-      [id]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Chemical not found' });
-    }
-
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error('❌ Error fetching chemical by ID:', err);
-    res.status(500).json({ error: 'Database fetch error' });
-  }
-});
-
-// GET: ดึงรายการ chemical ทั้งหมด
-router.get('/chemicals', async (req, res) => {
-  try {
-    const pool = getDB(req);
-    const result = await pool.query('SELECT * FROM chemicals ORDER BY id');
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: 'Database error' });
-  }
-});
-
-
-router.get('/barcode', async (req, res) => {
-  try {
-    const pool = getDB(req);
-    const result = await pool.query('SELECT * FROM barcode ORDER BY id');
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: 'Database error' });
-  }
-});
-
-router.post('/barcode', async (req, res) => {
-  const { barcode_value } = req.body;
-
-  // ตรวจสอบข้อมูลที่จำเป็น
-  if (!barcode_value) {
+  if (!Name || !formula || !Type || !Warning || !Elucidation || !LocateName) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
   try {
     const pool = getDB(req);
-    const scan_time = new Date(); // ใช้เวลาปัจจุบัน
     const result = await pool.query(
-      'INSERT INTO barcode ( barcode_value, scan_time) VALUES ($1, $2) RETURNING *',
-      [ barcode_value, scan_time]
+      `INSERT INTO Storage (Name, formula, Type, Picture, Warning, Elucidation, LocateName)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [Name, formula, Type, Picture, Warning, Elucidation, LocateName]
     );
-
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error(err);
+    console.error('❌ Error inserting Storage:', err);
     res.status(500).json({ error: 'Database insert error' });
   }
 });
 
+// ------------------- Barcode Routes -------------------
 
+// GET - ดึงข้อมูล Barcode ทั้งหมด
+router.get('/barcode', async (req, res) => {
+  try {
+    const pool = getDB(req);
+    const result = await pool.query('SELECT * FROM Barcode ORDER BY id');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
 
+// POST - เพิ่มข้อมูล Barcode
+router.post('/barcode', async (req, res) => {
+  const { Name, Barcode, Location, ImportDate, ExpiredDate } = req.body;
+
+  if (!Name || !Barcode || !Location || !ImportDate || !ExpiredDate) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    const pool = getDB(req);
+    const result = await pool.query(
+      `INSERT INTO Barcode (Name, Barcode, Location, ImportDate, ExpiredDate)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [Name, Barcode, Location, ImportDate, ExpiredDate]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error('❌ Error inserting Barcode:', err);
+    res.status(500).json({ error: 'Database insert error' });
+  }
+});
+
+// ------------------- Log Routes -------------------
+
+// GET - ดึงข้อมูล Log ทั้งหมด
+router.get('/log', async (req, res) => {
+  try {
+    const pool = getDB(req);
+    const result = await pool.query('SELECT * FROM Log ORDER BY Time DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// POST - เพิ่มข้อมูล Log
+router.post('/log', async (req, res) => {
+  const { Name, Barcode, Action } = req.body;
+
+  if (!Name || !Barcode || !Action) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    const pool = getDB(req);
+    const Time = new Date();
+    const result = await pool.query(
+      `INSERT INTO Log (Name, Barcode, Action, Time)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [Name, Barcode, Action, Time]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error('❌ Error inserting Log:', err);
+    res.status(500).json({ error: 'Database insert error' });
+  }
+});
 
 module.exports = router;
