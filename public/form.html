@@ -134,7 +134,7 @@
     const chem = chemicalsData.find(c => c.id === Number(id));
     if (!chem) return;
 
-    alert("กรุณาแสกนสารเพื่อเพิ่มหรือลดสาร"); // ✅ เพิ่ม alert ตรงนี้
+    alert("กรุณาแสกนสารเพื่อเพิ่มหรือลดสาร");
 
     const confirmText = delta > 0
       ? `คุณต้องการเพิ่มปริมาณของ "${chem.name}" ขึ้น 1 หน่วยหรือไม่?`
@@ -147,7 +147,17 @@
       return;
     }
 
-    // อัปเดต amount
+    // 🧪 สแกนบาร์โค้ดจาก ESP8266
+    const barcodeRes = await fetch("http://192.168.1.64/scan");
+    const { barcode } = await barcodeRes.json();
+
+    // ✅ ตรวจสอบว่า barcode ที่สแกน ตรงกับที่เก็บไว้หรือไม่
+    if (barcode !== chem.barcode) {
+      alert("❌ บาร์โค้ดไม่ตรงกับสารเคมีนี้");
+      return;
+    }
+
+    // 🔁 อัปเดต amount ใน backend
     const res = await fetch(`/api/chemicals/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -156,29 +166,10 @@
 
     if (!res.ok) throw new Error("ไม่สามารถอัปเดตข้อมูลได้");
 
-    // ✨ เพิ่มส่วนนี้เมื่อ delta > 0 (เพิ่มปริมาณ)
-    if (delta > 0) {
-      try {
-        const barcodeRes = await fetch("http://<ESP8266-IP>/scan");
-        const { barcode } = await barcodeRes.json();
-
-        await fetch("/api/barcodes", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chemical_id: id,
-            barcode_value: barcode
-          })
-        });
-      } catch (barcodeErr) {
-        console.warn("ไม่สามารถสแกนบาร์โค้ดได้:", barcodeErr);
-      }
-    }
-
     const updated = await res.json();
     alert("✅ อัปเดตสำเร็จ");
 
-    chemicalsData = chemicalsData.map(c => c.id === id ? updated : c);
+    chemicalsData = chemicalsData.map(c => c.id === updated.id ? updated : c);
     showChemicalDetail(updated);
     renderChemicals(chemicalsData);
 
@@ -187,6 +178,7 @@
     alert("❌ เกิดข้อผิดพลาดในการอัปเดต");
   }
 }
+
   window.updateAmount = updateAmount;
 
   function showChemicalDetail(chemical) {
@@ -237,30 +229,36 @@
     };
 
     document.getElementById("addForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const name = document.getElementById("name").value;
-      const formula = document.getElementById("formula").value;
-      const type = document.getElementById("type").value;
-      const amount = parseInt(document.getElementById("amount").value);
-      const image = document.getElementById("image").value;
+  e.preventDefault();
+  const name = document.getElementById("name").value;
+  const formula = document.getElementById("formula").value;
+  const type = document.getElementById("type").value;
+  const amount = parseInt(document.getElementById("amount").value);
+  const image = document.getElementById("image").value;
 
-      try {
-        const res = await fetch("/api/chemicals", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, formula, type, amount, image })
-        });
+  try {
+    // 🔍 สแกน barcode
+    const barcodeRes = await fetch("http://192.168.1.64/scan");
+    const { barcode } = await barcodeRes.json();
 
-        if (!res.ok) throw new Error("ไม่สามารถเพิ่มข้อมูลได้");
-
-        alert("✅ เพิ่มข้อมูลเรียบร้อยแล้ว!");
-        document.getElementById("modal").style.display = "none";
-        loadChemicals();
-      } catch (err) {
-        alert("❌ เกิดข้อผิดพลาดในการเพิ่มข้อมูล");
-        console.error(err);
-      }
+    // ➕ เพิ่มข้อมูลลงฐานข้อมูลพร้อม barcode
+    const res = await fetch("/api/chemicals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, formula, type, amount, image, barcode })
     });
+
+    if (!res.ok) throw new Error("ไม่สามารถเพิ่มข้อมูลได้");
+
+    alert("✅ เพิ่มข้อมูลเรียบร้อยแล้ว!");
+    document.getElementById("modal").style.display = "none";
+    loadChemicals();
+  } catch (err) {
+    alert("❌ เกิดข้อผิดพลาดในการเพิ่มข้อมูล");
+    console.error(err);
+  }
+});
+
 
     document.getElementById("addButton").addEventListener("click", () => {
       document.getElementById("modal").style.display = "block";
