@@ -1,6 +1,11 @@
 //server/routes.js
 const express = require('express');
+const multer = require('multer');
 const router = express.Router();
+
+// Multer ใช้เก็บไฟล์ใน memory
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 // Middleware ดึง db จาก app
 function getDB(req) {
@@ -22,8 +27,31 @@ router.get('/storage', async (req, res) => {
 });
 
 // POST - เพิ่มข้อมูล Storage
-router.post('/storage', async (req, res) => {
-  const { Name, formula, Type, Picture, Warning, Elucidation, LocateName } = req.body;
+// router.post('/storage', async (req, res) => {
+//   const { Name, formula, Type, Picture, Warning, Elucidation, LocateName } = req.body;
+
+//   if (!Name || !formula || !Type || !Warning || !Elucidation || !LocateName) {
+//     return res.status(400).json({ error: 'Missing required fields' });
+//   }
+
+//   try {
+//     const pool = getDB(req);
+//     const result = await pool.query(
+//       `INSERT INTO Storage (Name, formula, Type, Picture, Warning, Elucidation, LocateName)
+//        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+//       [Name, formula, Type, Picture, Warning, Elucidation, LocateName]
+//     );
+//     res.status(201).json(result.rows[0]);
+//   } catch (err) {
+//     console.error('❌ Error inserting Storage:', err);
+//     res.status(500).json({ error: 'Database insert error' });
+//   }
+// });
+
+// POST - เพิ่มข้อมูล Storage พร้อมรูปภาพ
+router.post('/storage', upload.single('Picture'), async (req, res) => {
+  const { Name, formula, Type, Warning, Elucidation, LocateName } = req.body;
+  const Picture = req.file ? req.file.buffer : null;
 
   if (!Name || !formula || !Type || !Warning || !Elucidation || !LocateName) {
     return res.status(400).json({ error: 'Missing required fields' });
